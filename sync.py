@@ -230,7 +230,9 @@ def refresh_accounts(werss: str, feeds_meta: list[dict], cfg: dict) -> None:
     now = time.time()
     state = json.loads(REFRESH_STATE_PATH.read_text(encoding="utf-8")) if REFRESH_STATE_PATH.exists() else {}
     last = state.setdefault("last_refresh", {})
-    due = [f for f in feeds_meta if now - last.get(f["id"], 0) >= cfg["min_hours"] * 3600]
+    due = [f for f in feeds_meta
+           if f["id"] != "MP_WXS_FEATURED_ARTICLES"  # hand-picked articles (add_article.py), nothing to crawl
+           and now - last.get(f["id"], 0) >= cfg["min_hours"] * 3600]
     due.sort(key=lambda f: last.get(f["id"], 0))  # longest-waiting first
     due = due[: cfg["max_per_run"]]
     if not due:
