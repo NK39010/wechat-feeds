@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<opml version="2.0"><head><title>公众号订阅</title></head><body>
+    <outline type="rss" text="解码合成生物" title="解码合成生物" xmlUrl="https://nk39010.github.io/wechat-feeds/feeds/MP_WXS_3880721966/feed.xml"/>
+    <outline type="rss" text="代谢工程与合成生物学" title="代谢工程与合成生物学" xmlUrl="https://nk39010.github.io/wechat-feeds/feeds/MP_WXS_3276547294/feed.xml"/>
+    <outline type="rss" text="合成生物学期刊" title="合成生物学期刊" xmlUrl="https://nk39010.github.io/wechat-feeds/feeds/MP_WXS_3923298587/feed.xml"/>
+    <outline type="rss" text="CellPress全科学" title="CellPress全科学" xmlUrl="https://nk39010.github.io/wechat-feeds/feeds/MP_WXS_3590707840/feed.xml"/>
+    <outline type="rss" text="BioArt" title="BioArt" xmlUrl="https://nk39010.github.io/wechat-feeds/feeds/MP_WXS_3073426651/feed.xml"/>
+    <outline type="rss" text="遇见生物合成" title="遇见生物合成" xmlUrl="https://nk39010.github.io/wechat-feeds/feeds/MP_WXS_3203870961/feed.xml"/>
+</body></opml>
