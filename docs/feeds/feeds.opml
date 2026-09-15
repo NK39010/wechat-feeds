@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <opml version="2.0"><head><title>公众号订阅</title></head><body>
+    <outline type="rss" text="精选文章" title="精选文章" xmlUrl="https://nk39010.github.io/wechat-feeds/feeds/MP_WXS_FEATURED_ARTICLES/feed.xml"/>
     <outline type="rss" text="解码合成生物" title="解码合成生物" xmlUrl="https://nk39010.github.io/wechat-feeds/feeds/MP_WXS_3880721966/feed.xml"/>
     <outline type="rss" text="代谢工程与合成生物学" title="代谢工程与合成生物学" xmlUrl="https://nk39010.github.io/wechat-feeds/feeds/MP_WXS_3276547294/feed.xml"/>
     <outline type="rss" text="合成生物学期刊" title="合成生物学期刊" xmlUrl="https://nk39010.github.io/wechat-feeds/feeds/MP_WXS_3923298587/feed.xml"/>
