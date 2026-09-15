@@ -1,25 +1,26 @@
-# 注册 Windows 计划任务：每小时同步一次公众号文章并推送
-# 用法（在本目录的 PowerShell 里）：  powershell -ExecutionPolicy Bypass -File .\register_task.ps1
-# 取消：  Unregister-ScheduledTask -TaskName wechat-feeds-sync -Confirm:$false
+﻿# Register a Windows scheduled task: sync WeChat articles and push, every hour.
+# Usage (PowerShell in this folder):  powershell -ExecutionPolicy Bypass -File .\register_task.ps1
+# Remove:  Unregister-ScheduledTask -TaskName wechat-feeds-sync -Confirm:$false
 
-$root = $PSScriptRoot
-$python = Join-Path $root ".venv\Scripts\python.exe"
-$log = Join-Path $root "sync.log"
+$root   = $PSScriptRoot
+$python = Join-Path $root '.venv\Scripts\python.exe'
+$log    = Join-Path $root 'sync.log'
 
-# 通过 cmd 包一层，把输出追加到 sync.log，方便排查
-$action = New-ScheduledTaskAction -Execute "cmd.exe" `
-    -Argument "/c chcp 65001 >nul && `"$python`" sync.py >> `"$log`" 2>&1" `
-    -WorkingDirectory $root
+# cmd wrapper appends output to sync.log for troubleshooting
+$cmdArgs = '/c chcp 65001 >nul && set "PYTHONIOENCODING=utf-8" && "' + $python + '" sync.py >> "' + $log + '" 2>&1'
+$action  = New-ScheduledTaskAction -Execute 'cmd.exe' -Argument $cmdArgs -WorkingDirectory $root
 
-# 开机登录后 5 分钟开始，之后每小时一次
-$trigger = New-ScheduledTaskTrigger -AtLogOn
-$trigger.Delay = "PT5M"
-$trigger.Repetition = (New-ScheduledTaskTrigger -Once -At (Get-Date) -RepetitionInterval (New-TimeSpan -Hours 1)).Repetition
+# first run in 2 minutes, then every hour; missed runs (PC asleep/off) start as soon as possible
+$trigger = New-ScheduledTaskTrigger -Once -At (Get-Date).AddMinutes(2) -RepetitionInterval (New-TimeSpan -Hours 1)
 
-$settings = New-ScheduledTaskSettingsSet -StartWhenAvailable -DontStopIfGoingOnBatteries -AllowStartIfOnBatteries `
-    -ExecutionTimeLimit (New-TimeSpan -Minutes 30) -MultipleInstances IgnoreNew
+$settingsArgs = @{
+    StartWhenAvailable         = $true
+    AllowStartIfOnBatteries    = $true
+    DontStopIfGoingOnBatteries = $true
+    ExecutionTimeLimit         = (New-TimeSpan -Minutes 30)
+    MultipleInstances          = 'IgnoreNew'
+}
+$settings = New-ScheduledTaskSettingsSet @settingsArgs
 
-Register-ScheduledTask -TaskName "wechat-feeds-sync" -Action $action -Trigger $trigger -Settings $settings `
-    -Description "We-MP-RSS -> reMarkable feeds (wechat-feeds/sync.py)" -Force | Out-Null
-
-Write-Host "已注册计划任务 wechat-feeds-sync：登录后每小时运行一次，日志在 $log"
+Register-ScheduledTask -TaskName 'wechat-feeds-sync' -Action $action -Trigger $trigger -Settings $settings -Description 'We-MP-RSS -> reMarkable feeds (wechat-feeds/sync.py)' -Force | Out-Null
+Write-Host "Registered scheduled task 'wechat-feeds-sync' (hourly). Log: $log"

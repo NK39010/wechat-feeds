@@ -312,7 +312,7 @@ def write_feed(path: Path, feed: dict, feed_url: str, base: str) -> None:
     <atom:link href="{xml_escape(feed_url)}" rel="self" type="application/rss+xml"/>
     <description>{xml_escape(feed['intro'] or feed['name'])}</description>
     <language>zh-cn</language>
-    <lastBuildDate>{format_datetime(datetime.now(timezone.utc))}</lastBuildDate>
+    <lastBuildDate>{feed['items'][0]['published'] if feed['items'] else 'Thu, 01 Jan 2026 00:00:00 +0000'}</lastBuildDate>
 {chr(10).join(entries)}
   </channel>
 </rss>
