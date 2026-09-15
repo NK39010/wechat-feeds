@@ -19,6 +19,7 @@ import re
 import secrets
 import subprocess
 import sys
+import time
 import tomllib
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
@@ -33,7 +34,9 @@ from PIL import Image, ImageFilter
 
 ROOT = Path(__file__).parent
 CONFIG_PATH = ROOT / "config.toml"
+SECRETS_PATH = ROOT / "secrets.toml"
 STATE_PATH = ROOT / "data" / "state.json"
+REFRESH_STATE_PATH = ROOT / "data" / "refresh_state.json"
 DOCS = ROOT / "docs"
 CONTENT_NS = "{http://purl.org/rss/1.0/modules/content/}"
 IMG_HEADERS = {
@@ -210,6 +213,69 @@ def fetch_articles(http: httpx.Client, base: str, feed_id: str, limit: int) -> l
     return articles
 
 
+def refresh_accounts(werss: str, feeds_meta: list[dict], cfg: dict) -> None:
+    """Ask We-MP-RSS to pull new articles for the accounts that are due, gently enough to avoid WeChat's rate limit.
+
+    Uses the per-account "update" endpoint (the same as the manual button in its UI), because the built-in scheduled
+    task in current We-MP-RSS routes every MP_WXS_ feed to the WeRead collector and skips them without a WeRead cookie.
+    """
+    if not cfg["enabled"]:
+        return
+    secrets_cfg = tomllib.loads(SECRETS_PATH.read_text(encoding="utf-8-sig")) if SECRETS_PATH.exists() else {}
+    ak, sk = secrets_cfg.get("werss_ak", ""), secrets_cfg.get("werss_sk", "")
+    if not (ak and sk):
+        print("（secrets.toml 里没有 Access Key，跳过触发更新，只同步已有文章）")
+        return
+
+    now = time.time()
+    state = json.loads(REFRESH_STATE_PATH.read_text(encoding="utf-8")) if REFRESH_STATE_PATH.exists() else {}
+    last = state.setdefault("last_refresh", {})
+    if now < state.get("backoff_until", 0):
+        wait = (state["backoff_until"] - now) / 3600
+        print(f"上次疑似被限频，暂停触发更新（还剩 {wait:.1f} 小时）")
+        return
+
+    due = [f for f in feeds_meta if now - last.get(f["id"], 0) >= cfg["min_hours"] * 3600]
+    due.sort(key=lambda f: last.get(f["id"], 0))  # longest-waiting first
+    due = due[: cfg["max_per_run"]]
+    if not due:
+        return
+
+    http = httpx.Client(timeout=600, headers={"Authorization": f"AK-SK {ak}:{sk}"})
+    for i, feed in enumerate(due):
+        if i:
+            time.sleep(cfg["gap_seconds"])
+        print(f"  触发更新：{feed['name']} …", flush=True)
+        try:
+            resp = http.get(f"{werss}/api/v1/wx/mps/update/{feed['id']}", params={"start_page": 0, "end_page": 1})
+            if resp.status_code in (401, 403):
+                print("    ! Access Key 无效，请检查 secrets.toml")
+                break
+            body = resp.json()
+        except (httpx.HTTPError, ValueError) as e:
+            print(f"    ! 请求失败：{e}")
+            break
+        code, message = body.get("code"), body.get("message", "")
+        if code == 0:
+            total = (body.get("data") or {}).get("total", 0)
+            if total == 0:
+                # page 1 of an active account is never empty; We-MP-RSS swallows the rate-limit error and returns 0
+                state["backoff_until"] = time.time() + cfg["backoff_hours"] * 3600
+                print(f"    ! 返回 0 篇，疑似被微信限频，暂停更新 {cfg['backoff_hours']} 小时")
+                break  # not marked as refreshed, so it goes first once the backoff ends
+            last[feed["id"]] = time.time()
+            print(f"    获取到 {total} 篇（正文由 We-MP-RSS 陆续抓取，下一轮同步时出现）")
+        elif code == 40402:
+            last[feed["id"]] = time.time()  # updated moments ago by someone else
+        elif "Invalid Session" in message or "登录" in message:
+            print(f"    ! 公众号后台授权已失效，请到 {werss} 重新扫码。本次停止触发更新。")
+            break
+        else:
+            print(f"    ! 更新失败（{code}）：{message}")
+    REFRESH_STATE_PATH.parent.mkdir(parents=True, exist_ok=True)
+    REFRESH_STATE_PATH.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
 # ---------------------------------------------------------------- output
 
 def write_article(path: Path, feed_name: str, item: dict) -> None:
@@ -324,6 +390,7 @@ def main() -> int:
     if src["only"]:
         feeds_meta = [f for f in feeds_meta if f["name"] in src["only"]]
     print(f"We-MP-RSS 里有 {len(feeds_meta)} 个公众号")
+    refresh_accounts(werss, feeds_meta, cfg["refresh"])
 
     state = json.loads(STATE_PATH.read_text(encoding="utf-8")) if STATE_PATH.exists() else {}
     images = ImageStore(out / "img", base, cfg["images"])

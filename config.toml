@@ -7,6 +7,15 @@ items_per_feed = 30                   # 每个公众号 feed 保留的文章数
 # 只同步这些公众号（填 We-MP-RSS 里显示的名称）；留空 = 同步全部
 only = []
 
+[refresh]
+# 由本脚本触发 We-MP-RSS 更新公众号（代替它自带的定时任务：当前版本会把 MP_WXS_ 号强制走微信读书模式而跳过）
+# 需要在 We-MP-RSS 管理页创建 Access Key，填到同目录的 secrets.toml（不会提交到仓库）
+enabled = true
+min_hours = 6         # 每个公众号至少隔这么久才更新一次
+max_per_run = 2       # 每次运行最多更新几个号（脚本每小时跑一次，6 个号大约 3 小时轮完一遍）
+gap_seconds = 90      # 同一次运行里两个号之间的间隔
+backoff_hours = 3     # 疑似被限频（更新返回 0 篇）后，暂停更新这么久
+
 [site]
 # GitHub Pages 地址（仓库名不同就改最后一段）
 site_url = "https://nk39010.github.io/wechat-feeds/"

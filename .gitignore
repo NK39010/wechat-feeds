@@ -1,3 +1,5 @@
 .venv/
 __pycache__/
 *.log
+secrets.toml
+data/refresh_state.json
