@@ -1,0 +1,26 @@
+# 公众号 → reMarkable 同步配置
+# 本机 We-MP-RSS 抓到的文章 → 清洗排版、图片按墨水屏处理 → 每个公众号一个 feed → 推送到私有仓库 → Cloudflare Pages
+
+[source]
+werss_url = "http://localhost:8001"   # We-MP-RSS 地址
+items_per_feed = 30                   # 每个公众号 feed 保留的文章数
+# 只同步这些公众号（填 We-MP-RSS 里显示的名称）；留空 = 同步全部
+only = []
+
+[site]
+# Cloudflare Pages 分配的地址，建好项目后填，例如 https://wechat-feeds-xxx.pages.dev
+site_url = "https://example.pages.dev"
+# 所有内容都放在这个随机目录下，不知道这串字符就猜不到订阅地址（首次运行 sync.py 会自动生成并写回本文件）
+secret_path = ""
+
+[images]
+# 针对 reMarkable 2（1404px 宽灰度屏）。公众号图片有防盗链，必须下载后重新托管
+max_width = 1404
+grayscale = true
+gray_gamma = 1.7      # 压暗中间调，浅色字不发白（1.0 = 不处理）
+sharpen = true        # 缩小后轻度锐化
+quality = 90
+min_width = 40        # 比这更窄的图（分隔线、小图标）直接丢掉
+
+[git]
+push = true           # 同步完自动 commit + push
