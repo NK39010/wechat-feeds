@@ -15,7 +15,7 @@ reMarkable 读的是公网地址，不需要和电脑在同一个 WiFi；电脑�
 
 1. **We-MP-RSS 跑起来**：见 `../we-mp-rss/README.md`，扫码并添加好公众号。**不需要**在它里面建定时任务/WebHook。
    - 管理页顶部菜单 → Access Key → 创建，把 AK 和 SK 填进本目录的 `secrets.toml`（SK 只显示一次；该文件不会提交）。
-   - 之后由 `sync.py` 按 `config.toml` 的 `[refresh]` 节奏逐个触发更新：每号至少隔 6 小时、每次最多 2 个、疑似限频自动暂停 3 小时。
+   - 之后由 `sync.py` 按 `config.toml` 的 `[refresh]` 节奏逐个触发更新：每小时只触发 1 个号、每个号至少隔 6 小时。（更新接口是后台异步抓取，返回值看不出是否被限频，所以只靠放慢节奏。）
      （We-MP-RSS 自带的定时任务在当前版本会把 `MP_WXS_` 号强制走微信读书模式，没配微信读书 Cookie 就全部跳过，所以不用它。）
 2. **建仓库**：GitHub 上新建公开仓库 `wechat-feeds`，不要勾选 README。然后在本目录：
    ```bash

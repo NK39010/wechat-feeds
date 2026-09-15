@@ -230,11 +230,6 @@ def refresh_accounts(werss: str, feeds_meta: list[dict], cfg: dict) -> None:
     now = time.time()
     state = json.loads(REFRESH_STATE_PATH.read_text(encoding="utf-8")) if REFRESH_STATE_PATH.exists() else {}
     last = state.setdefault("last_refresh", {})
-    if now < state.get("backoff_until", 0):
-        wait = (state["backoff_until"] - now) / 3600
-        print(f"上次疑似被限频，暂停触发更新（还剩 {wait:.1f} 小时）")
-        return
-
     due = [f for f in feeds_meta if now - last.get(f["id"], 0) >= cfg["min_hours"] * 3600]
     due.sort(key=lambda f: last.get(f["id"], 0))  # longest-waiting first
     due = due[: cfg["max_per_run"]]
@@ -257,14 +252,10 @@ def refresh_accounts(werss: str, feeds_meta: list[dict], cfg: dict) -> None:
             break
         code, message = body.get("code"), body.get("message", "")
         if code == 0:
-            total = (body.get("data") or {}).get("total", 0)
-            if total == 0:
-                # page 1 of an active account is never empty; We-MP-RSS swallows the rate-limit error and returns 0
-                state["backoff_until"] = time.time() + cfg["backoff_hours"] * 3600
-                print(f"    ! 返回 0 篇，疑似被微信限频，暂停更新 {cfg['backoff_hours']} 小时")
-                break  # not marked as refreshed, so it goes first once the backoff ends
+            # The endpoint only starts a background crawl and returns at once, so its result says nothing about
+            # WeChat's rate limit; the pacing above (one account per run, each at most every min_hours) is the guard.
             last[feed["id"]] = time.time()
-            print(f"    获取到 {total} 篇（正文由 We-MP-RSS 陆续抓取，下一轮同步时出现）")
+            print("    已提交，We-MP-RSS 在后台抓取；新文章会在之后的同步中出现")
         elif code == 40402:
             last[feed["id"]] = time.time()  # updated moments ago by someone else
         elif "Invalid Session" in message or "登录" in message:
