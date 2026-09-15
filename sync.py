@@ -22,7 +22,7 @@ import sys
 import time
 import tomllib
 import xml.etree.ElementTree as ET
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from email.utils import format_datetime, parsedate_to_datetime
 from html import escape
 from html.parser import HTMLParser
@@ -221,6 +221,11 @@ def refresh_accounts(werss: str, feeds_meta: list[dict], cfg: dict) -> None:
     """
     if not cfg["enabled"]:
         return
+    if cfg.get("paused_until"):
+        until = datetime.strptime(cfg["paused_until"], "%Y-%m-%d %H:%M").replace(tzinfo=timezone(timedelta(hours=8)))
+        if datetime.now(timezone.utc) < until:
+            print(f"（更新已暂停到 {cfg['paused_until']}，本次只同步已有文章）")
+            return
     secrets_cfg = tomllib.loads(SECRETS_PATH.read_text(encoding="utf-8-sig")) if SECRETS_PATH.exists() else {}
     ak, sk = secrets_cfg.get("werss_ak", ""), secrets_cfg.get("werss_sk", "")
     if not (ak and sk):
