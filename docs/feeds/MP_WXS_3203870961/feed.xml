@@ -6,14 +6,14 @@
     <atom:link href="https://nk39010.github.io/wechat-feeds/feeds/MP_WXS_3203870961/feed.xml" rel="self" type="application/rss+xml"/>
     <description>遇见生物合成</description>
     <language>zh-cn</language>
-    <lastBuildDate>Sun, 20 Sep 2026 10:46:49 +0800</lastBuildDate>
+    <lastBuildDate>Sun, 20 Sep 2026 11:46:48 +0800</lastBuildDate>
     <item>
       <title>⚠ 公众号订阅已暂停更新：请重新扫码登录微信读书</title>
       <link>https://nk39010.github.io/wechat-feeds/feeds/MP_WXS_3203870961/NOTICE_LOGIN_20260920.html</link>
       <guid isPermaLink="false">wechat-NOTICE_LOGIN_20260920</guid>
-      <pubDate>Sun, 20 Sep 2026 10:46:49 +0800</pubDate>
-      <description><![CDATA[<p><strong>微信读书登录已于 2026-09-20 10:46 失效</strong>，从那以后所有公众号都不会再收录新文章。</p><p>处理方法：在电脑上运行 <code>wechat-rss-lite\app.py</code>，打开 <code>http://127.0.0.1:8780</code> → 登录账号 → 扫码登录 / 换号。</p><p>重新登录并同步一次后，这条提醒会自动消失。</p>]]></description>
-      <content:encoded><![CDATA[<p><strong>微信读书登录已于 2026-09-20 10:46 失效</strong>，从那以后所有公众号都不会再收录新文章。</p><p>处理方法：在电脑上运行 <code>wechat-rss-lite\app.py</code>，打开 <code>http://127.0.0.1:8780</code> → 登录账号 → 扫码登录 / 换号。</p><p>重新登录并同步一次后，这条提醒会自动消失。</p>]]></content:encoded>
+      <pubDate>Sun, 20 Sep 2026 11:46:48 +0800</pubDate>
+      <description><![CDATA[<p><strong>微信读书登录已于 2026-09-20 11:46 失效</strong>，从那以后所有公众号都不会再收录新文章。</p><p>处理方法：在电脑上运行 <code>wechat-rss-lite\app.py</code>，打开 <code>http://127.0.0.1:8780</code> → 登录账号 → 扫码登录 / 换号。</p><p>重新登录并同步一次后，这条提醒会自动消失。</p>]]></description>
+      <content:encoded><![CDATA[<p><strong>微信读书登录已于 2026-09-20 11:46 失效</strong>，从那以后所有公众号都不会再收录新文章。</p><p>处理方法：在电脑上运行 <code>wechat-rss-lite\app.py</code>，打开 <code>http://127.0.0.1:8780</code> → 登录账号 → 扫码登录 / 换号。</p><p>重新登录并同步一次后，这条提醒会自动消失。</p>]]></content:encoded>
     </item>
     <item>
       <title>中国药大董廖斌/南京大学梁勇团队Angew｜改</title>
